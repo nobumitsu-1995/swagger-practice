@@ -2,7 +2,23 @@ openapi: "3.0.3"
 
 info:
   title: "Sample API"
+  description: |
+    # feature
+    - Get users.
+    - Create Users.
   version: "1.0.0"
+
+servers:
+  - url: "http://localhost:{port}"
+    description: "local development"
+    variables:
+      port:
+        enum: ["3000", "8080"]
+        default: "3000"
+  - url: "http://api.stg.example.com"
+    description: "stg development"
+  - url: "http://api.example.com"
+    description: "production"
 
 paths:
   "/message":
@@ -17,6 +33,44 @@ paths:
               schema:
                 type: string
                 example: "Hello world!!"
+  
+  "/shops/{shopId}/reviews":
+    get:
+      summary: "get shop reviews"
+      description: "get shop reviews"
+      deprecated: false
+      tags: ["shop"]
+      parameters:
+        - name: shopId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: ""
+    post:
+      summary: "add shop review"
+      description: "add shop review"
+      deprecated: false
+      tags: ["shop"]
+      parameters:
+        - name: shopId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                score: { type: integer, example: 3 }
+                comment: { type: string, example: "美味しかった" }
+      responses:
+        "201":
+          description: ""
 
 components:
   schemas:
