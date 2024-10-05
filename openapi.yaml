@@ -41,6 +41,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Review"
+      security: []
+      
 
     post:
       summary: "Create new review"
@@ -62,6 +64,9 @@ paths:
               schema: { type: string, format: url }
         "400":
           $ref: "#/components/responses/400-BadRequest"
+
+security:
+  - apikey_auth: []
 
 components:
   schemas:
@@ -97,3 +102,8 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ClientError"
+  securitySchemes:
+    apikey_auth:
+      type: apiKey
+      name: X-Api-Key
+      in: header
