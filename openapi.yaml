@@ -1,82 +1,99 @@
-openapi: "3.0.3"
+openapi: "3.0.0"
 
 info:
-  title: "Sample API"
+  title: "Shop Review API"
   description: |
-    # feature
-    - Get users.
-    - Create Users.
+    # Features
+    - Get reviews.
+    - Post review.
   version: "1.0.0"
 
-servers:
+servers: 
   - url: "http://localhost:{port}"
-    description: "local development"
+    description: "Local Development"
     variables:
       port:
         enum: ["3000", "8080"]
         default: "3000"
-  - url: "http://api.stg.example.com"
-    description: "stg development"
-  - url: "http://api.example.com"
-    description: "production"
+  - url: "https://stg.tastylog.com/v1"
+    description: "Staging"
+  - url: "https://api.tastylog.com/v1"
+    description: "Production"
+
+tags:
+- name: "reviews"
+  description: "Shop review operation"
 
 paths:
-  "/message":
+  "/shops/{shopId}/reviews":
+    parameters:
+    - $ref: "#/components/parameters/ShopId"
     get:
-      summary: "sample api get operation"
-      description: "sample api get operation"
+      summary: "Get shop review"
+      description: "Get specified shop's reviews"
+      tags: ["reviews"]
       responses:
         "200":
-          description: "success operation"
+          description: "Success operation"
           content:
             application/json:
               schema:
-                type: string
-                example: "Hello world!!"
-  
-  "/shops/{shopId}/reviews":
-    get:
-      summary: "get shop reviews"
-      description: "get shop reviews"
-      deprecated: false
-      tags: ["shop"]
-      parameters:
-        - name: shopId
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        "200":
-          description: ""
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+
     post:
-      summary: "add shop review"
-      description: "add shop review"
-      deprecated: false
-      tags: ["shop"]
-      parameters:
-        - name: shopId
-          in: path
-          required: true
-          schema: { type: string }
+      summary: "Create new review"
+      description: "Create specified shop's new review"
+      tags: ["reviews"]
       requestBody:
-        description: ""
+        description: "Contents of review"
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                score: { type: integer, example: 3 }
-                comment: { type: string, example: "美味しかった" }
+              $ref: "#/components/schemas/Review"
       responses:
         "201":
-          description: ""
+          description: "Success operation"
+          headers:
+            location:
+              description: "New URL of created review"
+              schema: { type: string, format: url }
+        "400":
+          $ref: "#/components/responses/400-BadRequest"
 
 components:
   schemas:
-    SampleInt32:
-      type: integer
-      format: int32
-    SampleDateString:
-      type: string
-      format: date
+    Review:
+      type: object
+      properties:
+        score: { type: integer }
+        comment: { type: string }
+    ClientError:
+      type: object
+      properties:
+        code: { type: string }
+        type: { type: string }
+        message: { type: string }
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              code: { type: string }
+  parameters:
+    ShopId:
+      name: shopId
+      in: path
+      description: "Shop identifier"
+      required: true
+      schema: { type: string }
+  responses:
+    400-BadRequest:
+      description: "Client side error"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ClientError"
