@@ -1,0 +1,149 @@
+openapi: 3.0.0
+info:
+  title: Shop Review API
+  description: |
+    # Features
+    - Get reviews.
+    - Post review.
+  version: 1.0.0
+servers:
+- url: "http://localhost:{port}"
+  description: Local Development
+  variables:
+    port:
+      default: "3000"
+      enum:
+      - "3000"
+      - "8080"
+- url: https://stg.tastylog.com/v1
+  description: Staging
+- url: https://api.tastylog.com/v1
+  description: Production
+security:
+- apikey_auth: []
+tags:
+- name: reviews
+  description: Shop review operation
+paths:
+  /shops/{shopId}/reviews:
+    get:
+      tags:
+      - reviews
+      summary: Get shop review
+      description: Get specified shop's reviews
+      operationId: shopsShopIdReviewsGET
+      parameters:
+      - name: shopId
+        in: path
+        description: Shop identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+                x-content-type: application/json
+      security: []
+      x-swagger-router-controller: Reviews
+    post:
+      tags:
+      - reviews
+      summary: Create new review
+      description: Create specified shop's new review
+      operationId: shopsShopIdReviewsPOST
+      parameters:
+      - name: shopId
+        in: path
+        description: Shop identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Contents of review
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+        required: true
+      responses:
+        "201":
+          description: Success operation
+          headers:
+            location:
+              description: New URL of created review
+              style: simple
+              explode: false
+              schema:
+                type: string
+                format: url
+        "400":
+          description: Client side error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientError'
+      x-swagger-router-controller: Reviews
+components:
+  schemas:
+    Review:
+      type: object
+      properties:
+        score:
+          type: integer
+        comment:
+          type: string
+      example:
+        score: 0
+        comment: comment
+    ClientError:
+      type: object
+      properties:
+        code:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientError_errors'
+    ClientError_errors:
+      type: object
+      properties:
+        field:
+          type: string
+        code:
+          type: string
+  responses:
+    "400-BadRequest":
+      description: Client side error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientError'
+  parameters:
+    ShopId:
+      name: shopId
+      in: path
+      description: Shop identifier
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+  securitySchemes:
+    apikey_auth:
+      type: apiKey
+      name: X-Api-Key
+      in: header
